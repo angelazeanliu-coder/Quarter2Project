@@ -48,8 +48,16 @@ public class Player {
     }
 
     public boolean asteroidCollision(int x, int y, int width, int height) {
-
+        // Check if player rectangle overlaps with asteroid rectangle
+        if (this.x + this.width > x &&      // Player's right edge past asteroid's left
+            this.x < x + width &&            // Player's left edge before asteroid's right
+            this.y + this.height > y &&      // Player's bottom edge past asteroid's top
+            this.y < y + height) {           // Player's top edge before asteroid's bottom
+            return true;
+        }
         return false;
     }
+
+}
 
 }
