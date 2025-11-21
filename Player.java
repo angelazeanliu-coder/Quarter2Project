@@ -4,6 +4,7 @@ import java.awt.Graphics;
 public class Player {
 
     private int x, y, width, height;
+    private boolean alive;
 
     Asteroid asteroid;
 
@@ -43,7 +44,7 @@ public class Player {
 
         // Asteroid collision
         if (asteroidCollision(asteroid.getX(), asteroid.getY(), asteroid.getWidth(), asteroid.getLength())) {
-            // Should kill/lose life for player
+            alive = false;
         }
     }
 
