@@ -78,6 +78,9 @@ public class GamePanel extends JPanel implements KeyListener, Runnable {
 
         double scaleX = (double) currentWidth / ORIGINAL_WIDTH;
         double scaleY = (double) currentHeight / ORIGINAL_HEIGHT;
+
+        
+        double scaleFactor = Math.min(scaleX, scaleY); 
         
         currentScaleFactor = scaleFactor;
 
