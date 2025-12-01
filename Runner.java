@@ -1,20 +1,19 @@
 import javax.swing.JFrame;
+
 public class Runner {
-  
-	public static void main(String[] args) {
 
-
-		JFrame frame = new JFrame("Game Demo");
-
-		//Create panel and add it to the frame
-		Screen sc = new Screen();
-
-
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.add(sc);
-		frame.pack();
-		frame.setVisible(true);
-
-
+    public static void main(String[] args) {
+        JFrame window = new JFrame("Space Invaders");
+        window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        window.setResizable(true);
+        
+        GamePanel gamePanel = new GamePanel();
+        
+        window.add(gamePanel);
+        window.pack();
+        window.setLocationRelativeTo(null);
+        window.setVisible(true);
+        
+        gamePanel.animate();
     }
 }
