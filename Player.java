@@ -1,64 +1,145 @@
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.Image;
+import java.awt.Rectangle;
+import java.awt.event.KeyEvent;
+import java.io.File;
+import java.io.IOException;
+import javax.imageio.ImageIO;
+import java.util.ArrayList;
 
 public class Player {
 
-    private int x, y, width, height;
-    private boolean alive;
+    private int playerID;
+    private Image shipImage;
+    
+    private int x, y;
+    private int width = 100;
+    private int height = 100;
+    private int dx = 0;
+    private final int SPEED = 10;
+    
+    private int minX, maxX;
+    private int leftKey, rightKey, fireKey;
+    
+    private int score = 0;
+    private int shotTimer = 0;
+    private final int BULLET_COOLDOWN = 20; 
+    
+    private ArrayList<Bullet> bullets;
 
-    Asteroid asteroid;
+    public Player(int id, int boundaryMinX, int boundaryMaxX) {
+        this.playerID = id;
+        this.minX = boundaryMinX;
+        this.maxX = boundaryMaxX - width;
 
-    public Player() {
-        x = 500;
-        y = 750;
-        width = 30;
-        height = 30;
+        this.y = GamePanel.SCREEN_HEIGHT - height - 50; 
+        this.x = (minX + maxX) / 2;
+        
+        bullets = new ArrayList<>();
 
+        if (id == 1) {
+            try {
+                shipImage = ImageIO.read(new File("Player1.png"));
+            } catch (IOException e) {
+                System.out.println("Image Load Error Player1: " + e.getMessage());
+            }
+            this.leftKey = KeyEvent.VK_A;
+            this.rightKey = KeyEvent.VK_D;
+            this.fireKey = KeyEvent.VK_W;
+        } else {
+            try {
+                shipImage = ImageIO.read(new File("Player2.png"));
+            } catch (IOException e) {
+                System.out.println("Image Load Error Player2: " + e.getMessage());
+            }
+            this.leftKey = KeyEvent.VK_LEFT;
+            this.rightKey = KeyEvent.VK_RIGHT;
+            this.fireKey = KeyEvent.VK_UP;
+        }
     }
 
-    public void drawMe(Graphics g) {
-        g.fillOval(x, y, width, height);
-    }
-
-    public void move(String direction) {
-        if (direction.equals("right")) {
-            x += 10;
+    public void update() {
+        x += dx;
+        
+        if (x < minX) {
+            x = minX;
         }
-        if (direction.equals("left")) {
-            x -= 10;
+        if (x > maxX) {
+            x = maxX;
         }
-
-        // Colision
-        if (x <= 0) {
-            x = 0;
+        
+        if (shotTimer > 0) {
+            shotTimer--;
         }
-        if (x >= 600) {
-            x = 600;
-        }
-
-    }
-
-    public void checkp1Collisions() {
-
-        asteroid = new Asteroid();
-
-        // Asteroid collision
-        if (asteroidCollision(asteroid.getX(), asteroid.getY(), asteroid.getWidth(), asteroid.getLength())) {
-            alive = false;
+        
+        for (int i = 0; i < bullets.size(); i++) {
+            Bullet b = bullets.get(i);
+            b.update();
+            if (!b.isActive()) {
+                bullets.remove(i);
+                i--;
+            }
         }
     }
 
-    public boolean asteroidCollision(int x, int y, int width, int height) {
-        // Check if player rectangle overlaps with asteroid rectangle
-        if (this.x + this.width > x &&      // Player's right edge past asteroid's left
-            this.x < x + width &&            // Player's left edge before asteroid's right
-            this.y + this.height > y &&      // Player's bottom edge past asteroid's top
-            this.y < y + height) {           // Player's top edge before asteroid's bottom
-            return true;
+    public void draw(Graphics g) {
+        if (shipImage != null) {
+            g.drawImage(shipImage, x, y, width, height, null);
+        } else {
+            g.setColor((playerID == 1) ? Color.BLUE : Color.RED);
+            g.fillRect(x, y, width, height);
         }
-        return false;
+        
+        for (Bullet b : bullets) {
+            b.draw(g);
+        }
+    }
+    
+    public void shoot() {
+        if (shotTimer <= 0) {
+            int bulletX = x + width / 2 - 5; 
+            int bulletY = y;
+            bullets.add(new Bullet(bulletX, bulletY));
+            shotTimer = BULLET_COOLDOWN;
+        }
+    }
+    
+    public void handleKeyPress(KeyEvent e) {
+        int key = e.getKeyCode();
+        
+        if (key == leftKey) {
+            dx = -SPEED;
+        } else if (key == rightKey) {
+            dx = SPEED;
+        } else if (key == fireKey) {
+            shoot();
+        }
     }
 
-}
-
+    public void handleKeyRelease(KeyEvent e) {
+        int key = e.getKeyCode();
+        
+        if (key == leftKey && dx < 0) {
+            dx = 0;
+        } else if (key == rightKey && dx > 0) {
+            dx = 0;
+        }
+    }
+    
+    public int getScore() {
+        return score;
+    }
+    
+    public void incrementScore(int points) {
+        score += points;
+    }
+    
+    public Rectangle getBounds() {
+        return new Rectangle(x, y, width, height);
+    }
+    
+    public ArrayList<Bullet> getBullets() {
+        return bullets;
+    }
 }
